@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora</title>
+    <style>
+        *{
+            box-sizing: border-box;
+            margin: 0;
+        }
+        #calculator{
+            display: grid;
+            grid-template-columns: 86px 86px 86px 85px 84px 84px 84px;
+            grid-gap: 11px;
+            background-color:#333;
+            color:cadetblue;
+            padding: 20px;
+            max-width: 700px;
+            margin: 0 auto;
+            border: solid 1px #ccc;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            border-radius: 5px;
+            margin-top: 40px;
+        }
+        .titulo{
+            text-align: center;
+            font-size: 24px;
+            padding: 20px; 
+        }
+        .pilha {
+            background-color: gray;
+            color: black;
+            padding: 10px;
+            font-size: 24px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3) inset;
+            border-radius: 5px;
+        }
+        #p1 { 
+            grid-area: 1 / 4 / 1 / 8; 
+            background-color:lightgray;
+            color: gray;
+        }
+        #p2 { grid-area: 1 / 1/ 1 / 4; }
+        #p3 { grid-area: 2 / span 3; }
+        #p4 { grid-area: 3 / span 3; }
+        #p5 { grid-area: 4 / span 3; }
+        #p6 { grid-area: 5 / span 3; }
+        #p7 { grid-area: 6 / span 3; }
+        .resultado{
+            padding: 10px;
+            font-size: 24px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3) inset;
+            border-radius: 5px;
+        }
+        .botao{
+            margin-top: 20px;
+        }
+        button{
+            padding: 10px;
+            font-size: 20px;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3 s ease;
+        }
+        button:hover{
+            background-color: #ddd;
+        }
+        .limpar{
+            background-color:blueviolet;
+            color: #fff;
+        }
+        .numero{
+            background-color:burlywood;
+            color:black;
+        }
+        .numerobin{
+            background-color:burlywood;
+            color:black;
+        }
+        .decimal{
+            background-color:burlywood;
+            color:black;
+        }
+        .operador{
+            background-color: #0074d9;
+            color: #fff;
+        }
+        .entrada{
+            background-color:brown;
+            /*grid-column: span 2;*/
+            color: #fff;
+        }  
+    </style>
+</head>
+<body>
+    <div class="titulo">
+        <p id="titulo">Calculadora sobre pilha (stack)</p>
+    </div>
+    <div id="calculator">
+        <p class="resultado" id="p1">0</p>
+        <p class="pilha" id="p2">0</p>
+        <p class="pilha" id="p3">0</p>
+        <p class="pilha" id="p4">0</p>
+        <p class="pilha" id="p5">0</p>
+        <p class="pilha" id="p6">0</p>
+        <p class="pilha" id="p7">0</p>
+        <!-- input type="text" class="resultado" id="p1" placeholder="0" >
+        <label class="pilha" id="p2">0</label>
+        <label class="pilha" id="p3">0</label>
+        <label class="pilha" id="p4">0</label>
+        <label class="pilha" id="p5">0</label>
+        <label class="pilha" id="p6">0</label>
+        <label class="pilha" id="p7">0</label -->
+        <button class="limpar" title="Limpa o stack">CS</button>
+        <button class="limpar" title="Remove topo da pilha">POP</button>
+        <button class="limpar" title="Limpa o input">C</button>
+        <button class="operador" title="Divisão">/</button>
+        <button class="numero">7</button>
+        <button class="numero">8</button>
+        <button class="numero">9</button>
+        <button class="operador" title="Produto">*</button>
+        <button class="numero">4</button>
+        <button class="numero">5</button>
+        <button class="numero">6</button>
+        <button class="operador" title="Subtração y-x">-</button>
+        <button class="numerobin">1</button>
+        <button class="numero">2</button>
+        <button class="numero">3</button>
+        <button class="operador">+</button>
+        <button class="numerobin">0</button>
+        <button class="decimal">.</button>
+        <button class="operador">-/+</button>
+        <button class="entrada" title="Coloca valor na pilha (push)">Enter</button>
+        <button class="operador" title="Calcula fatorial">!</button>
+        <button class="operador" title="Potência">y^x</button>
+        <button class="operador" title="Raiz quadrada">sqrt</button>
+        <button class="operador" title="Quadrado">x^2</button>
+        <button class="operador" title="Troca posição no topo da pilha">y<>x</button>
+        <button class="operador" title="Modo binário">bin</button>
+        <button class="operador" title="Modo hexadecimal">hex</button>  <!-- bin -->
+    </div>
+    <script>   // +++++++++++++++++++++++++++++++++++++++ javascript ++++++++++++++++++++++
+    // falta o <- que apaga o último algarismo escrito
+    // falta associar o teclado às mesmas funções do rato
+    // passar os dados a operar para variáveis numéricas separando os dados da  (done)
+    // a receção de dados tem que ser feito sob a forma de carater para haver validação de cada tecla
+    // rl consegue fazer teletrabalho durante a aula presencial
+        const botoes = document.querySelectorAll("button");
+        const entrada = document.getElementById("p1");
+        const pilha = document.getElementsByClassName("pilha");
+        let entradaValue = entrada.textContent;
+        let pilhaValues = [];
+        for (let i = 0; i <=5; i++){
+            pilhaValues[i] = +pilha[i].textContent;
+        }
+        let apontador = -1;
+//        let topPilha = "";
+        let novoNum = true;
+//        let mBin, mHex = false;
+//        let mDec = true;
+        let modoVer = "dec";   // modoVer dec - decimal, bin - binário, hex - hexadecimal, oct - octal 
+        const botoesOP = ["!","y^x","sqrt","x^2","y<>x","bin"];
+        for (let i = 0; i < botoes.length; i++){
+            botoes[i].addEventListener("click", ()=>{
+                const botao = i;
+                const valorBotao = botoes[i].textContent;
+                console.log("valor Botão: ", valorBotao);
+                switch(valorBotao){
+                case "C":
+                    limpaEntrada();
+                    break;
+                case "=":
+                    calculateResult()
+                    operado(true);
+                    break;
+                case "-/+":
+                    entradaValue *= -1;
+                    break;
+                case "*":
+                    multiplica();
+                    operado(true);
+                    break;
+                case "/":
+                    divide();
+                    operado(true);
+                    break;
+                case "-":
+                    subtrai();
+                    operado(true);
+                    break;
+                case "+":
+                    soma();
+                    operado(true);
+                    break;
+                case "!":
+                    fatorialRecursivo();
+                    operado(true);
+                    break;
+                case "x^2":
+                    quadrado();
+                    operado(true);
+                    break;
+                case "sqrt":
+                    raizQuadrada();
+                    operado(true);
+                    break;
+                case "y^x":
+                    potencia();
+                    operado(true);
+                    break;
+                case "bin":
+                    toBin(botao);
+                    operado(true);
+                    break;
+                case "hex":
+                    toHex(botao);
+                    operado(true);
+                    break;
+                case "dec":
+                    toDec(botao);
+                    operado(true);
+                    break;
+                case "Enter":
+                    operado(true);
+                    break;
+                case "y<>x":
+                    swap();
+                    operado(true);
+                    break;
+                case "CS":
+                    limpaPilha();
+                    operado(false);
+                    break;
+                case "POP":
+                    pop();
+                    operado = true;
+                    break;
+                default:
+                    if (novoNum) {
+                        push(entradaValue);
+                        limpaEntrada();
+                        operado(false);    
+                    }
+                    juntaNum(valorBotao);
+                }
+                // entradaValue = +entrada.value;
+                mostra();
+            });
+        }
+        function mostra(){  // atualiza as entradas no modo numérico em vigor
+            switch(modoVer){
+                case "dec":
+                    entrada.textContent = entradaValue;
+                    for (let i = 0; i <= 5; i++){
+                        pilha[i].textContent = pilhaValues[i];
+                    }
+                    break;
+                case "bin":
+                    entrada.textContent = entradaValue.toString(2);
+                    for (let i = 0; i <= 5; i++){
+                        pilha[i].textContent = pilhaValues[i].toString(2);
+                    }
+                    break;
+                case "hex":
+                    entrada.textContent = entradaValue;
+                    for (let i = 0; i <= 5; i++){
+                        pilha[i].textContent = pilhaValues[i];
+                    }
+                    break;
+                case "oct":
+                    entrada.textContent = entradaValue;
+                    for (let i = 0; i <= 5; i++){
+                        pilha[i].textContent = pilhaValues[i];
+                    }
+                    break;
+                default:
+                    consolo.log("Não devia passar por aqui...");
+            }
+        }
+        function toBin(posBotao){
+            botoes[posBotao].textContent = "dec";
+            botoes[posBotao].title = "Modo decimal";
+            botoes[posBotao+1].disabled = true;
+            botoes[posBotao+1].style.backgroundColor = "gray";
+            botoes[posBotao+1].title = "desativado";
+            var numeros = document.getElementsByClassName('numero');
+            for(i = 0; i < numeros.length; i++) {
+                numeros[i].style.backgroundColor = 'gray';
+                numeros[i].disabled = true;
+            }
+            // entrada.value = parseInt(+entrada.value, 2);
+            let num = +entradaValue;
+            let aux = num.toString(2);
+            console.log("entradaValue em toBin: ", aux);
+            console.log("entrada.textContent em toBin: ", entrada.textContent);
+            entrada.textContent = aux;
+            for (let i=0;i<=5;i++){
+                let num = +pilha[i].textContent;
+                pilha[i].textContent = num.toString(2);
+            }            
+//            mDec = false;
+//            mBin = true;
+            modoVer = "bin";
+//            mostra();
+        }
+        function toHex(posBotao){
+            botoes[posBotao].textContent = "dec";
+            botoes[posBotao].title = "Modo decimal";
+//            mDec = false;
+//            mHex = true;
+            modoVer = "hex"
+            for (i = 1; i <= 6; i++ ){
+                botoes[posBotao-i].textContent = String.fromCharCode(71-i);
+                botoes[posBotao-i].style.color = "black"; 
+                botoes[posBotao-i].style.backgroundColor = "burlywood"; 
+            }
+        }
+        function toDec(posBotao){
+            if (modoVer === 'hex'){
+                for (i = 1; i <= 6; i++ ){
+                    botoes[posBotao-i].textContent = botoesOP[6-i];
+                    botoes[posBotao-i].style.color = "#fff"; 
+                    botoes[posBotao-i].style.backgroundColor = "#0074d9"; 
+                }
+                botoes[posBotao].textContent = "hex";
+                botoes[posBotao].title = "Modo hexadecimal";
+            }
+            if (modoVer === 'bin'){
+                botoes[posBotao+1].disabled = false;
+                botoes[posBotao+1].style.backgroundColor = "#0074d9";
+                botoes[posBotao+1].title = "Modo hexadecimal";
+                botoes[posBotao].textContent = "bin";
+                botoes[posBotao].title = "Modo binário";
+                var numeros = document.getElementsByClassName('numero');
+                for(i = 0; i < numeros.length; i++) {
+                    numeros[i].style.backgroundColor = 'burlywood';
+                    numeros[i].disabled = false;
+                }
+                let dec = parseInt(+entrada.textContent, 2);
+                entrada.textContent = dec;
+                for (let i=0;i<=5;i++){
+                    let dec  = parseInt(+pilha[i].textContent, 2);
+                    pilha[i].textContent = dec;
+                }            
+            }
+//            mBin = mHex = false;
+//            mDec = true;
+            modoVer = "dec"; 
+        }
+        function operado(escolha){
+            if (escolha){
+                novoNum = true;
+                entrada.style.color = "black";
+                entrada.style.backgroundColor = "darkgray";
+            } else {
+                novoNum = false;
+                entrada.style.color = "gray";
+                entrada.style.backgroundColor = "lightgray";
+            }
+        }
+        function subtrai(){
+            let x = entradaValue;
+            let y = pilhaValues[0];
+            pop();
+            entradaValue = y-x;
+            mostra();
+        }
+        function soma(){
+            let x = entradaValue;
+            let y = +pilhaValues[0];
+            pop();
+            entradaValue = x+y;
+        //    mostra();
+        }
+        function divide(){
+            let x = entradaValue;
+            let y = pilhaValues[0];
+            pop();
+            entradaValue = y/x;
+        //    mostra();
+        }
+        function multiplica(){
+            let x = entradaValue;
+            let y = pilhaValues[0];
+            pop();
+            entradaValue = x * y;
+        //    mostra();
+        }
+        function fatorialRecursivo(){
+            let limite = 30;
+            let resultado = 1
+            let num = entradaValue;
+            if (num >= 0 && num <= limite){
+                resultado = fatorial(num);
+                entradaValue = resultado;
+            }
+        //    mostra();
+        }
+        function fatorial(num){
+            if (num < 2) {
+                return 1;
+            }
+            return num * fatorial( num-1 );
+        }
+        function quadrado(){
+            let x = entradaValue;
+            entradaValue = x ** 2;
+        //    mostra();
+        }
+        function raizQuadrada(){
+            let x = entradaValue;
+            entradaValue = Math.sqrt(x);
+        //    mostra();
+        }
+        function potencia(){
+            let x = entradaValue;
+            let y = pilhaValues[0];
+            pop();
+            entradaValue = y ** x;
+        //    mostra();
+        }
+        function limpaPilha(){
+            for (let i = 0; i < pilhaValues.length; i++ ){
+                pilhaValues[i] = "0";
+            }
+            limpaEntrada();
+        //    mostra();
+        }
+        function swap(){
+            let aux = entradaValue;
+            entradaValue = pilhaValues[0];
+            pilhaValues[0] = aux;
+        //    mostra();
+        }
+        function pop(){
+            for (let i = 0; i < pilhaValues.length-1; i++){
+                pilhaValues[i] = pilhaValues[i+1];
+            //    pilha[i].textContent = pilha[i+1].textContent;
+            }
+            entradaValue = pilhaValues[0];
+        //    mostra();
+        }
+        function push(top){
+            for (let i = pilhaValues.length-1; i > 0; i--){
+                pilhaValues[i] = pilhaValues[i-1]; 
+            }
+            pilhaValues[0] = top;
+        //    mostra();            
+        }
+        function limpaEntrada(){
+            entrada.textContent = "";
+            entradaValue = "";  // 0  
+        }
+        function calculateResult(){
+            entradaValue = eval(entradaValue);
+        }
+        function juntaNum(valorBotao){
+            console.log("valor Botão em juntaNum: ", valorBotao);
+            entrada.textContent += valorBotao;
+            entradaValue = entrada.textContent;
+            console.log("entrada.textContent e entradaValue: ", entrada.textContent, " ", entradaValue);
+        }
+        // ---------------------------------------------------- javascript ------------------------------------------
+    </script>
+</body>
+</html>
